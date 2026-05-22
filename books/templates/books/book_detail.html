@@ -1,0 +1,137 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ book.title }} - 詳細{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+  <h1 class="auth-title text-left">書籍詳細</h1>
+
+  <section class="book-detail-main">
+    <div class="book-detail-grid">
+      <div class="detail-cover">
+        <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/300?text=No+Image' }}"
+             alt="{{ book.title }}"
+             onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+      </div>
+
+      <div class="detail-info">
+        <h2 class="book-title-large">{{ book.title }}</h2>
+        <p class="book-author">{{ book.author }}</p>
+
+        <div class="detail-meta mt-1">
+          <p><strong>評価：</strong>
+            <span class="review-rating-value">
+              {% if avg_rating %}{{ avg_rating|floatformat:1 }} / 5.0{% else %}未評価{% endif %}
+            </span>
+          </p>
+          <p><strong>ISBN：</strong> {{ book.isbn|default:"-" }}</p>
+          <p><strong>出版日：</strong> {{ book.publication_date|date:"Y-m-d"|default:"-" }}</p>
+          <p><strong>購入日：</strong> {{ book.purchase_date|date:"Y-m-d"|default:"-" }}</p>
+          <p><strong>状態：</strong>
+            <span class="status-tag status-tag-{{ status_info.color }}">{{ status_info.label }}</span>
+          </p>
+        </div>
+
+        <div class="detail-actions mt-1">
+          {% if can_return %}
+            <a href="{% url 'books:return_book' book.id %}?next={{ request.path }}"
+               class="btn btn-success btn-full"
+               onclick="return confirm('返却しますか？');">返却する</a>
+
+          {% elif can_borrow %}
+            {% if borrow_limit_reached %}
+              <div class="alert-danger">
+                <p>※貸出の上限（5冊）に達しています</p>
+              </div>
+            {% else %}
+              <a href="{% url 'books:borrow_book' book.id %}?next={{ request.path }}"
+                 class="btn btn-primary btn-full">貸出する</a>
+            {% endif %}
+
+          {% elif can_reserve %}
+            {% if reserve_limit_reached %}
+              <div class="alert-danger">
+                <p>※予約の上限（5冊）に達しています</p>
+              </div>
+            {% else %}
+              <a href="{% url 'books:reserve_book' book.id %}"
+                 class="btn btn-warning btn-full"
+                 onclick="return confirm('予約しますか？')">予約する</a>
+            {% endif %}
+
+          {% else %}
+            <button class="btn btn-outline btn-full" disabled>貸出中 / 予約不可</button>
+          {% endif %}
+
+          {% if user.is_staff %}
+            <div class="staff-actions mt-1">
+              <a href="{% url 'books:book_update' book.id %}" class="btn btn-outline">編集</a>
+              <a href="{% url 'books:book_delete' book.id %}" class="btn btn-danger">削除</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="review-section">
+    <div class="section-header">
+      <h2 class="section-title">レビュー</h2>
+      {% if has_borrowed %}
+        <a href="{% url 'books:add_review' book.id %}" class="btn btn-outline btn-small">
+          {% if my_review %}レビューを編集{% else %}レビューを書く{% endif %}
+        </a>
+      {% else %}
+        <p class="hint-text">※レビューは貸出したユーザーのみ投稿できます</p>
+      {% endif %}
+    </div>
+
+    {% if my_review %}
+      <div class="review-card review-card-mine">
+        <div class="review-header">
+          <strong>あなたのレビュー</strong>
+          <a href="{% url 'books:delete_review' my_review.id %}?next=books:book_detail"
+              class="link-delete">削除</a>
+        </div>
+        <div class="review-rating">
+          {% for i in "12345"|make_list %}
+            {% if forloop.counter <= my_review.rating %}★{% else %}☆{% endif %}
+          {% endfor %}
+        </div>
+        <div class="review-body">{{ my_review.comment|linebreaks }}</div>
+        <div class="text-right">
+          <small class="review-date">{{ my_review.created_at|date:"Y-m-d" }}</small>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="other-reviews">
+      {% for review in other_reviews %}
+        <div class="review-card">
+          <!-- <div class="review-header"><strong>{{ review.user.username }}</strong></div> -->
+          <div class="review-header"><strong>Unknown</strong></div>
+          <div class="review-rating">
+            {% for i in "12345"|make_list %}
+              {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+            {% endfor %}
+          </div>
+          <div class="review-body">{{ review.comment|linebreaks }}</div>
+          <div class="text-right">
+            <small class="review-date">{{ review.created_at|date:"Y-m-d" }}</small>
+          </div>
+        </div>
+      {% empty %}
+        {% if not my_review %}
+          <p class="text-center mt-1 color-text-muted">レビューはまだありません</p>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="auth-footer">
+    <a href="javascript:history.back()" class="link-secondary">戻る</a>
+  </div>
+</div>
+{% endblock %}

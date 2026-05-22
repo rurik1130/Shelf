@@ -1,0 +1,15 @@
+<!doctype html>
+{% extends "base.html" %}
+{% block title %}レビュー削除完了 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="auth-title">レビュー削除完了</h1>
+  <div class="text-center mb-2">
+    <p>レビューを正常に削除しました</p>
+  </div>
+  <div class="auth-footer">
+    <a href="{% url 'books:book_list' %}" class="btn btn-primary btn-large">ホームへ戻る</a>
+  </div>
+</div>
+{% endblock %}

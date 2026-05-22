@@ -1,0 +1,7 @@
+[run]
+omit =
+    */tests.py
+    */migrations/*
+    manage.py
+    shelf/asgi.py
+    shelf/wsgi.py

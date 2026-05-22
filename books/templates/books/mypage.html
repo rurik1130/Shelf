@@ -1,0 +1,176 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}マイページ - Shelf{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="list-header mb-1">
+    <h1 class="page-title">マイページ</h1>
+    <div class="list-header-actions">
+      <p class="user-info">Hello, <strong>{{ user.username }} ( {{ user.last_name }} {{ user.first_name }} )</strong></p>
+    </div>
+  </div>
+
+  <section class="form-section mb-2">
+    <h2 class="section-title">貸出中の書籍</h2>
+    <div class="table-wrapper">
+      <table class="book-list-table mypage-table">
+        <thead>
+          <tr>
+            <th class="col-cover">書籍情報</th>
+            <th></th>
+            <th class="col-status"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in borrow_list %}
+            <tr>
+              <td class="td-cover">
+                <a href="{% url 'books:book_detail' item.book.id %}">
+                  <img src="{{ item.book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}" class="book-cover" alt="cover">
+                </a>
+              </td>
+              <td>
+                <div class="book-info">
+                  <a href="{% url 'books:book_detail' item.book.id %}" class="book-title">{{ item.book.title }}</a>
+                  <p class="book-author">{{ item.book.author }}</p>
+                  
+                  <div class="date-info mt-05">
+                    <small class="color-text-muted">期限：{{ item.due_date|date:"Y-m-d" }}</small>
+                    <p class="location-sub"><small>場所：{{ item.book.location.name|default:"不明" }}</small></p>
+                  </div>
+                </div>
+              </td>
+              <td class="td-status">
+                <div class="status-action-group">
+                  {% if item.is_overdue %}
+                    <span class="status-tag status-tag-danger mb-05">延滞 {{ item.overdue_days }} 日</span>
+                  {% else %}
+                    <span class="status-tag status-tag-warning mb-05">残り {{ item.remaining_days }} 日</span>
+                  {% endif %}
+                  
+                  <div class="button-group-vertical w-100">
+                    <a href="{% url 'books:return_book' item.book.id %}?next={% url 'books:mypage' %}"
+                        class="btn btn-success btn-small btn-fixed-width"
+                        onclick="return confirm('返却しますか？');">返却</a>
+                    <a href="{% url 'books:add_review' item.book.id %}" class="btn btn-outline btn-small btn-fixed-width">
+                      {% if item.my_review %}レビュー編集{% else %}レビュー投稿{% endif %}
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center color-text-muted">貸出中の書籍はありません</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="form-section mb-2">
+    <h2 class="section-title">予約中の書籍</h2>
+    <div class="table-wrapper">
+      <table class="book-list-table mypage-table">
+        <thead>
+          <tr>
+            <th class="col-cover">書籍情報</th>
+            <th></th>
+            <th class="col-status"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in reservation_list %}
+            <tr>
+              <td class="td-cover">
+                <a href="{% url 'books:book_detail' item.book.id %}">
+                  <img src="{{ item.book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}" class="book-cover" alt="cover">
+                </a>
+              </td>
+              <td>
+                <div class="book-info">
+                  <a href="{% url 'books:book_detail' item.book.id %}" class="book-title">{{ item.book.title }}</a>
+                  <p class="book-author">{{ item.book.author }}</p>
+                </div>
+              </td>
+              <td class="td-status">
+                <div class="status-action-group">
+                  {% if item.can_borrow %}
+                    <span class="status-tag status-tag-success mb-05">貸出可</span>
+                    <div class="button-group-vertical w-100">
+                      <a href="{% url 'books:borrow_book' item.book.id %}?next={{ request.path }}"
+                          class="btn btn-primary btn-small btn-fixed-width mb-05">貸出</a>
+                      
+                      <a href="{% url 'books:cancel_reservation' item.book.id %}?next={% url 'books:mypage' %}"
+                          class="btn btn-danger btn-small btn-fixed-width"
+                          onclick="return confirm('予約をキャンセルしますか？');">予約取消</a>
+                    </div>
+                  {% else %}
+                    <span class="status-tag status-tag-primary mb-05">貸出待ち</span>
+                    <a href="{% url 'books:cancel_reservation' item.book.id %}?next={% url 'books:mypage' %}"
+                        class="btn btn-danger btn-small btn-fixed-width"
+                        onclick="return confirm('予約をキャンセルしますか？');">予約取消</a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center color-text-muted">予約中の書籍はありません</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="form-section mb-2">
+    <h2 class="section-title">レビュー履歴</h2>
+    <div class="table-wrapper">
+      <table class="book-list-table mypage-table">
+        <thead>
+          <tr>
+            <th class="col-cover">書籍情報</th>
+            <th></th>
+            <th class="col-status"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for review in user_reviews %}
+            <tr>
+              <td class="td-cover">
+                <a href="{% url 'books:book_detail' review.book.id %}">
+                  <img src="{{ review.book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}" class="book-cover" alt="cover">
+                </a>
+              </td>
+              <td>
+                <div class="book-info">
+                  <a href="{% url 'books:book_detail' review.book.id %}" class="book-title">{{ review.book.title }}</a>
+                  <div class="review-rating mt-05" style="font-size: 0.9rem; color: #fbbf24;">
+                    {% for i in "12345"|make_list %}
+                      {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                  </div>
+                  <p class="book-author mt-05">{{ review.comment|truncatechars:60 }}</p>
+                </div>
+              </td>
+              <td class="td-status">
+                <div class="button-group-vertical w-100">
+                  <a href="{% url 'books:add_review' review.book.id %}" class="btn btn-outline btn-small">編集</a>
+                  <a href="{% url 'books:delete_review' review.id %}?next=books:mypage" class="btn btn-danger btn-small">削除</a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="text-center color-text-muted">レビュー済みの書籍はありません</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="text-center mt-2">
+    <a href="/" class="btn btn-outline">ホームへ戻る</a>
+  </div>
+</div>
+{% endblock %}

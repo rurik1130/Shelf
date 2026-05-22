@@ -1,0 +1,44 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}返却完了 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <div class="text-center">
+    <div class="success-icon success-icon-success">✓</div>
+    <h1 class="auth-title">返却手続き完了</h1>
+  </div>
+
+  <p class="auth-message">
+    返却を受け付けました<br>
+    お手数ですが、以下の場所へ本を戻してください
+  </p>
+
+  <div class="procedure-target">
+    <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}"
+         alt="{{ book.title }}"
+         class="book-cover"
+         onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+    
+    <div class="delete-target-info">
+      <p class="book-title">{{ book.title }}</p>
+      <p class="book-author">{{ book.author }}</p>
+      
+      <div class="location-guide mt-1">
+        <span class="location-guide-label">RETURN TO</span>
+        <p class="location-guide-value"><strong>{{ book.location }}</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-footer">
+    <a href="{% url 'books:mypage' %}" class="btn btn-primary btn-large">マイページへ戻る</a>
+    
+    <div class="text-center mt-1">
+      <a href="{% url 'books:book_list' %}" class="link-secondary">ホームへ戻る</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

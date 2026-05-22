@@ -1,0 +1,22 @@
+<!doctype html>
+{% extends "base.html" %}
+
+{% block title %}ユーザー登録{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1 class="auth-title">ユーザー登録</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-fields">
+      {{ form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-success btn-large">登録</button>
+  </form>
+
+  <div class="auth-footer">
+    <p><a href="{% url 'accounts:login' %}">ログイン画面へ戻る</a></p>
+  </div>
+</section>
+{% endblock %}

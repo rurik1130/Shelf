@@ -1,0 +1,148 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}書籍一覧 - Shelf{% endblock %}
+
+{% block content %}
+<div class="list-header">
+  <h1 class="page-title">書籍一覧</h1>
+  <div class="list-header-actions">
+    {% if user.is_authenticated %}
+      <a href="{% url 'books:mypage' %}" class="btn btn-outline btn-small">マイページ</a>
+      {% if user.is_staff %}
+        <a href="{% url 'books:book_create' %}" class="btn btn-success btn-small">書籍を登録</a>
+        <a href="{% url 'books:location_list' %}" class="btn btn-success btn-small">保管場所を管理</a>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<form method="get" class="search-form">
+  <div class="search-group">
+    <input type="text" name="q" placeholder="タイトル・著者・ISBNで検索" value="{{ query }}" class="form-input">
+    <select name="status" class="form-select">
+      <option value="">すべての状態</option>
+      <option value="available" {% if status_filter == "available" %}selected{% endif %}>貸出可のみ</option>
+    </select>
+    <div class="search-actions" style="display: flex; gap: 8px;">
+      <button type="submit" class="btn btn-success">検索</button> 
+      <a href="{% url 'books:book_list' %}" class="btn btn-outline">リセット</a>
+    </div>
+  </div>
+</form>
+
+<div class="table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th class="col-cover">書影</th>
+        <th>書籍情報</th>
+        <th class="col-status" style="width: 180px;">状態 / 操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in page_obj %}
+        <tr class="{% if item.is_my_borrow or item.is_my_reserve %}row-my-item{% endif %}">
+          <td class="col-cover">
+            <a href="{% url 'books:book_detail' item.book.id %}">
+              <img src="{{ item.book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}" class="book-cover-thumb">
+            </a>
+          </td>
+
+          <td>
+            <div class="book-info">
+              <a href="{% url 'books:book_detail' item.book.id %}" class="book-title">{{ item.book.title }}</a>
+              <p class="book-author">{{ item.book.author }}</p>
+            </div>
+
+            {% if user.is_staff %}
+              <div class="admin-action-links">
+                <a href="{% url 'books:book_update' item.book.id %}">編集</a>
+                <a href="{% url 'books:book_delete' item.book.id %}" class="text-danger">削除</a>
+              </div>
+            {% endif %}
+          </td>
+
+          <td class="col-status">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span class="status-tag status-tag-{{ item.color }}">
+                {{ item.label }}
+              </span>
+              
+              {% if user.is_authenticated %}
+                <div class="action-buttons" style="display: flex; flex-direction: column; gap: 4px;">
+                  
+                  {% if item.is_my_borrow %}
+                    <form action="{% url 'books:return_book' item.book.id %}" method="post">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success btn-small" onclick="return confirm('返却しますか？')">
+                        返却
+                      </button>
+                    </form>
+
+                  {% else %}
+                    {% if item.can_borrow_now %}
+                      <form action="{% url 'books:borrow_book' item.book.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-small mb-05">
+                          貸出
+                        </button>
+                      </form>
+                      
+                      {% if item.is_my_reserve %}
+                        <form action="{% url 'books:cancel_reservation' item.book.id %}" method="post">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('予約を取り消しますか？')">
+                            予約取消
+                          </button>
+                        </form>
+                      {% endif %}
+
+                    {% elif item.is_my_reserve %}
+                      <form action="{% url 'books:cancel_reservation' item.book.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('予約を取り消しますか？')">
+                          予約取消
+                        </button>
+                      </form>
+
+                    {% elif item.book.get_status == "reserved" %}
+                      <form action="{% url 'books:reserve_book' item.book.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-small" onclick="return confirm('予約しますか？');">
+                          予約
+                        </button>
+                      </form>
+                    {% endif %}
+                  {% endif %}
+
+                </div>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="text-center">該当する書籍がありません</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<nav class="pagination mt-1">
+  <p class="pagination-count">全 {{ page_obj.paginator.count }} 件</p>
+  <div class="pagination-links">
+    {% if page_obj.has_previous %}
+      <a href="?page=1&q={{ query }}&status={{ status_filter }}" class="btn btn-outline btn-small">« 最初</a>
+      <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn btn-outline btn-small">前へ</a>
+    {% endif %}
+
+    <span class="page-current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status_filter }}" class="btn btn-outline btn-small">次へ</a>
+      <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}&status={{ status_filter }}" class="btn btn-outline btn-small">最後 »</a>
+    {% endif %}
+  </div>
+</nav>
+{% endblock %}

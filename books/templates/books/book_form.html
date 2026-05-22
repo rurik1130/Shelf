@@ -1,0 +1,370 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}書籍登録 - Shelf{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h1 class="auth-title text-left">書籍登録</h1>
+
+  <form method="post" class="book-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <section class="form-section">
+      <h2 class="section-title">ISBN情報を取得</h2>
+      <div class="isbn-field-group">
+        <div class="form-fields" style="flex: 1; margin: 0;">
+          <p>
+            <label for="id_isbn">ISBN</label>
+            {{ form.isbn }}
+          </p>
+        </div>
+        <div class="button-group">
+          <button type="button" class="btn btn-primary" onclick="fetchBook()">情報取得</button>
+          <button type="button" id="start-scan-btn" class="btn btn-primary" onclick="startScan()">📷 スキャン開始</button>
+          <button type="button" id="stop-scan-btn" class="btn btn-danger btn-hidden" onclick="stopScan()">停止</button>
+        </div>
+      </div>
+      <div id="reader" class="qr-reader-container"></div>
+    </section>
+
+    <div class="form-grid">
+      <section class="form-section">
+        <h2 class="section-title">書籍情報</h2>
+        <div class="form-fields">
+          <p>
+            <label for="id_title">タイトル <span class="required" aria-hidden="true">*</span></label>
+            {{ form.title }}
+          </p>
+          <p>
+            <label for="id_author">著者 <span class="required" aria-hidden="true">*</span></label>
+            {{ form.author }}
+          </p>
+          <p>
+            <label for="id_cover_image_url">書影リンク</label>
+            {{ form.cover_image_url }}
+          </p>
+          <div class="preview-area mt-1">
+            <p class="preview-label"><strong>書影プレビュー</strong></p>
+            <div class="preview-box">
+              <img id="cover-preview"
+                  src=""
+                  class="img-preview"
+                  alt="書影プレビュー"
+                  style="display: none;" 
+                  onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=No+Image'">
+            </div>
+          </div>
+          <div class="field-row">
+            <p>
+              <label for="id_publication_date">出版日</label>
+              {{ form.publication_date }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="section-title">管理情報</h2>
+        <div class="form-fields">
+          <p>
+            <label for="id_purchase_date">購入日</label>
+            {{ form.purchase_date }}
+          </p>
+          <p>
+            <label for="id_location">保管場所 <span class="required" aria-hidden="true">*</span></label>
+            {{ form.location }}
+            <button type="button" class="btn-link" onclick="showLocationModal()">＋新しく追加</button>
+          </p>
+
+          <div id="locationModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+              <h3 class="section-title" style="margin-top: 0;">新しい保管場所を追加</h3>
+              <div class="form-fields">
+                <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 1rem;">
+                  <p style="flex: 1; margin: 0;">
+                    <label for="newLocationFloor">フロア <span class="required" aria-hidden="true">*</span></label>
+                    <input type="text" id="newLocationFloor" placeholder="5, B1" class="form-input">
+                  </p>
+                  
+                  <span style="font-size: 1.2rem; font-weight: bold; padding-bottom: 8px; color: #555;">F</span>
+                  
+                  <p style="flex: 2; margin: 0;">
+                    <label for="newLocationName">エリア <span class="required" aria-hidden="true">*</span></label>
+                    <input type="text" id="newLocationName" placeholder="ミーティングルーム" class="form-input">
+                  </p>
+                </div>
+              </div>
+              <div class="form-actions mt-1" style="display: flex; gap: 8px; justify-content: flex-end;">
+                <button type="button" onclick="saveLocation()" class="btn btn-success">保存</button>
+                <button type="button" onclick="hideLocationModal()" class="btn btn-secondary">キャンセル</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="form-actions mt-1">
+      <button type="submit" class="btn btn-success btn-large">この内容で登録する</button>
+      <div class="auth-footer">
+        <a href="javascript:history.back()" class="link-secondary">戻る</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+  let html5QrCode = null; // バーコードリーダーのインスタンス保持用
+  let isFetching = false;  // ISBN問い合わせ中の重複クリック防止フラグ
+
+  /**
+   * 表紙画像のプレビューを更新する
+   * URL入力欄に値があれば画像を表示し、空なら非表示にする
+   */
+  function updatePreview() {
+    const urlInput = document.getElementById("id_cover_image_url");
+    const img = document.getElementById("cover-preview");
+    if (!urlInput || !img) return;
+
+    if (urlInput.value && urlInput.value.trim() !== "") {
+      img.src = urlInput.value;
+      img.style.display = "block";
+    } else {
+      img.src = ""; 
+      img.style.display = "none";
+    }
+  }
+
+  /**
+   * 入力されたISBNを元に、バックエンド経由で書籍情報を取得する
+   */
+  async function fetchBook() {
+    // 既にリクエスト中の場合は処理をスキップ
+    if (isFetching) return;
+
+    // ハイフンを除去してISBNを取得
+    const isbnField = document.getElementById("id_isbn");
+    const isbn = isbnField.value.replace(/-/g, "").trim();
+    if (!isbn) return;
+
+    isFetching = true;
+    
+    // ボタンを「取得中...」にして無効化（連打防止）
+    const btn = document.querySelector("button[onclick='fetchBook()']");
+    const originalText = btn.innerText;
+    btn.innerText = "取得中...";
+    btn.disabled = true;
+
+    // 10秒でタイムアウトさせるためのコントローラー設定
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      // 書籍情報検索APIへリクエスト
+      const response = await fetch(`/books/isbn-lookup/?isbn=${isbn}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+
+      if (!response.ok) throw new Error("書籍が見つかりませんでした");
+      const data = await response.json();
+
+      // 各入力欄に取得したデータを反映
+      if (data.title) {
+        document.getElementById("id_title").value = data.title;
+      }
+      if (data.author) {
+        document.getElementById("id_author").value = data.author;
+      }
+      if (data.publication_date) {
+        document.getElementById("id_publication_date").value = data.publication_date;
+      }
+      if (data.cover_image_url) {
+        document.getElementById("id_cover_image_url").value = data.cover_image_url;
+      }
+
+      // 画像プレビューを更新
+      updatePreview();
+
+    } catch (err) {
+      if (err.name === "AbortError") {
+        alert("リクエストがタイムアウトしました。通信環境を確認してください。");
+      } else {
+        alert(err.message);
+      }
+    } finally {
+      // 状態を元に戻す
+      isFetching = false;
+      btn.innerText = originalText;
+      btn.disabled = false;
+      document.activeElement.blur(); // ボタンのフォーカスを外す
+    }
+  }
+
+  /**
+   * バーコードスキャン（カメラ）を開始する
+   */
+  async function startScan() {
+    // 既に起動中の場合は一度停止させる
+    if (html5QrCode) {
+      await stopScan();
+    }
+
+    // スキャンエリア（id="reader"）にインスタンスを生成
+    html5QrCode = new Html5Qrcode("reader");
+    const config = {
+      fps: 10, // 1秒あたりのフレーム数
+      qrbox: {width: 300, height: 150}, // 読み取り窓のサイズ（書籍バーコード用に横長）
+      formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13] // 本のJAN/ISBN（EAN-13）に限定
+    };
+
+    // ボタンの表示切り替え（スキャン開始 -> 停止）
+    document.getElementById("start-scan-btn").classList.add("btn-hidden");
+    document.getElementById("stop-scan-btn").classList.remove("btn-hidden");
+
+    // カメラ起動（背面カメラを優先）
+    html5QrCode.start(
+        {facingMode: "environment"},
+        config,
+        (decodedText) => {
+          // 読み取り成功時の処理
+          document.getElementById("id_isbn").value = decodedText; // ISBNを入力欄にセット
+          stopScan();   // スキャンを停止
+          fetchBook();  // そのまま書籍情報を自動検索
+        }
+    ).catch((err) => {
+      console.error(err);
+      alert("カメラを起動できませんでした");
+      resetButtons();
+    });
+  }
+
+  /**
+   * バーコードスキャンを停止し、領域をクリアする
+   */
+  async function stopScan() {
+    if (html5QrCode) {
+      try {
+        await html5QrCode.stop();
+        html5QrCode.clear();
+      } catch (err) {
+        console.warn("Stop error:", err);
+      }
+    }
+    document.getElementById("reader").innerHTML = ""; // 要素内の残骸をクリア
+    resetButtons();
+  }
+
+  /**
+   * ボタンの表示状態を「スキャン開始」が押せる初期状態に戻す
+   */
+  function resetButtons() {
+    document.getElementById("start-scan-btn").classList.remove("btn-hidden");
+    document.getElementById("stop-scan-btn").classList.add("btn-hidden");
+  }
+
+  /**
+   * 画面読み込み完了時の初期化処理
+   */
+  document.addEventListener("DOMContentLoaded", () => {
+    // URLが手入力された際にもプレビューを動的に更新するイベントを設定
+    const coverInput = document.getElementById("id_cover_image_url");
+    if (coverInput) {
+      coverInput.addEventListener("input", updatePreview);
+    }
+    // 編集画面などで最初からURLが入っている場合を考慮し、少し遅らせてプレビューを表示
+    setTimeout(updatePreview, 100);
+  });
+
+/* ==========================================
+ * 保管場所（ロケーション）追加モーダル関連の処理
+ * ========================================== */
+
+  /**
+   * 保管場所登録用のモーダルを表示する
+   */
+  function showLocationModal() {
+    document.getElementById("locationModal").style.display = "flex";
+  }
+
+  /**
+   * モーダルを閉じ、中の入力欄をリセットする
+   */
+  function hideLocationModal() {
+    document.getElementById("locationModal").style.display = "none";
+    document.getElementById("newLocationFloor").value = "";
+    document.getElementById("newLocationName").value = "";
+  }
+
+  /**
+   * 非同期（Ajax）で新しい保管場所をサーバーに保存し、セレクトボックスに追加する
+   */
+  async function saveLocation() {
+    const floorInput = document.getElementById("newLocationFloor");
+    const nameInput = document.getElementById("newLocationName");
+    const floor = floorInput.value.trim();
+    const name = nameInput.value.trim();
+    
+    if (!floor || !name) {
+      alert("フロアとエリアの両方を入力してください");
+      return;
+    }
+
+    try {
+      // Djangoのビューに対してPOSTリクエストを送信
+      const response = await fetch("{% url 'books:location_create' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}", // DjangoのCSRF対策
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        body: `floor=${encodeURIComponent(floor)}&name=${encodeURIComponent(name)}`
+      });
+
+      if (!response.ok) throw new Error("保存に失敗しました");
+
+      const data = await response.json();
+
+      // 既存のセレクトボックス（#id_location）に、新しく作成された保管場所を追加して選択状態にする
+      const select = document.getElementById("id_location");
+      const option = new Option(data.name, data.id); // Option(表示名, value)
+      select.add(option);
+      
+      select.value = data.id; // 新しい場所を選択状態にする
+
+      hideLocationModal();
+
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2000;
+}
+.modal-content {
+  background: #fff; padding: 2rem; border-radius: 8px;
+  width: 90%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-link {
+  background: none; border: none; color: #007bff;
+  text-decoration: underline; cursor: pointer; font-size: 0.8rem;
+}
+</style>
+{% endblock %}

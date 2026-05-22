@@ -1,0 +1,41 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}削除確認 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="auth-title">削除の確認</h1>
+
+  <div class="delete-target">
+    <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/120?text=No+Image' }}"
+         alt="{{ book.title }}"
+         class="book-cover"
+         onerror="this.src='https://via.placeholder.com/120?text=No+Image'"> <div class="delete-target-info">
+      <p class="book-title">{{ book.title }}</p>
+      <p class="book-author">{{ book.author }}</p>
+    </div>
+  </div>
+
+  <div class="alert-danger mb-1">
+    <p>この書籍をシステムから完全に削除しますか？</p>
+    <small>※この操作は取り消せません</small>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger btn-large">削除する</button>
+  </form>
+
+  <div class="auth-footer">
+    <div class="text-center">
+      <p>
+        <a href="javascript:history.back()" class="link-secondary">
+          戻る
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

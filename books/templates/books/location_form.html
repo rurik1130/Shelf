@@ -1,0 +1,36 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}保管場所の編集 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="auth-title">保管場所の編集</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="form-fields">
+      <div style="display: flex; gap: 8px; align-items: flex-end;">
+        <p style="flex: 1; margin: 0;">
+          <label for="floor">フロア <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" name="floor" id="floor" class="form-input" value="{{ floor }}" required placeholder="例: 5">
+        </p>
+        
+        <span style="font-size: 1.2rem; font-weight: bold; padding-bottom: 8px; color: #555;">F</span>
+        
+        <p style="flex: 2; margin: 0;">
+          <label for="name">エリア <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" name="name" id="name" class="form-input" value="{{ clean_name }}" required placeholder="例: ミーティングルーム">
+        </p>
+      </div>
+    </div>
+
+    <div class="form-actions mt-1">
+      <button type="submit" class="btn btn-success">更新する</button>
+      <a href="{% url 'books:location_list' %}" class="btn btn-outline">戻る</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

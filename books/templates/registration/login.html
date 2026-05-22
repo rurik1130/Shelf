@@ -1,0 +1,21 @@
+<!doctype html>
+{% extends "base.html" %}
+
+{% block title %}ログイン{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+  <h1 class="auth-title">ログイン</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-fields">
+      {{ form.as_p }}
+    </div>
+    <button type="submit" class="btn btn-success btn-large">ログイン</button>
+  </form>
+
+  <div class="auth-footer">
+    <p><a href="/accounts/signup/">新規登録はこちら</a></p>
+  </div>
+</section>
+{% endblock %}

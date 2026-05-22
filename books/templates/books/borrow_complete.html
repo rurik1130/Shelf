@@ -1,0 +1,51 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}貸出完了 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <div class="text-center">
+    <div class="success-icon success-icon-success">✓</div>
+    <h1 class="auth-title">貸出手続き完了</h1>
+  </div>
+
+  <p class="auth-message">
+    以下の書籍の貸出を受け付けました<br>
+    指定の本棚へ受け取りに行ってください
+  </p>
+
+  <div class="procedure-target">
+    <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}"
+         alt="{{ book.title }}"
+         class="book-cover"
+         onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+    
+    <div class="delete-target-info">
+      <p class="book-title">{{ book.title }}</p>
+      <p class="book-author">{{ book.author }}</p>
+      
+      <div class="mt-1">
+        <div class="date-badge">
+          <span class="date-badge-label">返却予定日</span>
+          <span class="date-badge-value">{{ due_date|date:"Y-m-d" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="location-guide">
+    <span class="location-guide-label">PICKUP LOCATION</span>
+    <p><strong>保管場所：</strong> {{ book.location }}</p>
+    <p><small>期間：{{ borrow.borrowed_at|date:"Y-m-d" }} ～ {{ due_date|date:"Y-m-d" }}</small></p>
+  </div>
+
+  <div class="auth-footer">
+    <a href="{% url 'books:book_list' %}" class="btn btn-primary btn-large">ホームへ戻る</a>
+    <div class="text-center mt-1">
+      <a href="{% url 'books:mypage' %}" class="link-secondary">マイページで貸出状況を確認</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

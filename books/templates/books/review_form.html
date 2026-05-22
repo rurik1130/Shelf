@@ -1,0 +1,64 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}レビュー投稿 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="auth-title">
+    {% if form.instance.pk %}レビューを編集{% else %}レビューを投稿{% endif %}
+  </h1>
+
+  <div class="procedure-target">
+    <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/80?text=No+Image' }}"
+         alt="{{ book.title }}"
+         class="book-cover"
+         onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+    
+    <div class="delete-target-info">
+      <p class="book-title">{{ book.title }}</p>
+      <p class="book-author">{{ book.author }}</p>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% if form.errors %}
+      <div class="alert alert-danger mb-1">
+        <ul class="errorlist" style="margin-bottom: 0;">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="form-fields">
+      <p>
+        <label for="{{ form.rating.id_for_label }}">評価（1〜5）</label>
+        {{ form.rating }}
+      </p>
+
+      <p>
+        <label for="{{ form.comment.id_for_label }}">コメント</label>
+        {{ form.comment }}
+      </p>
+    </div>
+
+    <div class="form-actions mt-1">
+      <button type="submit" class="btn btn-success btn-large"
+          onclick="return confirm('{% if form.instance.pk %}レビューを更新しますか？{% else %}レビューを投稿しますか？{% endif %}');">
+        {% if form.instance.pk %}レビューを更新する{% else %}レビューを投稿する{% endif %}
+      </button>
+    </div>
+  </form>
+
+  <div class="auth-footer">
+    <a href="javascript:history.back()" class="link-secondary">戻る</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}保管場所削除確認 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card wide-card">
+  <h1 class="auth-title">保管場所の削除</h1>
+
+  <div class="delete-confirmation-container">
+    <div class="delete-target-preview">
+      <p class="status-tag status-tag-danger mb-05">削除対象の場所</p>
+      <h2 class="book-title" style="font-size: 1.5rem; margin: 0.5rem 0;">{{ location.name }}</h2>
+    </div>
+
+    <div class="alert-box danger-box mt-1">
+      <p><strong>本当にこの保管場所を削除しますか？</strong></p>
+      <p><small>※この操作は取り消せません</small></p>
+    </div>
+
+    <form method="post" class="mt-1">
+      {% csrf_token %}
+      <div class="action-buttons">
+        <button type="submit" class="btn btn-danger">本当に削除する</button>
+        <a href="{% url 'books:location_list' %}" class="btn btn-outline">キャンセル</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}レビュー削除確認 - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card wide-card">
+  <h1 class="auth-title">レビューの削除</h1>
+
+  <div class="delete-confirmation-container">
+    <div class="delete-target-preview">
+      <p class="status-tag status-tag-danger mb-05">削除対象のレビュー</p>
+      <h2 class="book-title">{{ review.book.title }}</h2>
+
+      <div class="review-rating">
+        {% for i in "12345"|make_list %}
+          {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+        {% endfor %}
+        <span class="rating-text">({{ review.rating }} / 5)</span>
+      </div>
+
+      <div class="review-comment-scrollbox">
+        {{ review.comment|linebreaks }}
+      </div>
+    </div>
+
+    <div class="alert-box danger-box mt-1">
+      <p><strong>本当にこのレビューを削除しますか？</strong></p>
+      <p><small>※この操作は取り消せません</small></p>
+    </div>
+
+    <form method="post" class="mt-1">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <div class="action-buttons">
+        <button type="submit" class="btn btn-danger btn-full">レビューを完全に削除する</button>
+      </div>
+      <div class="auth-footer">
+        <a href="javascript:history.back()" class="link-secondary">戻る</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

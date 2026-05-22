@@ -1,0 +1,43 @@
+<!doctype html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}貸出手続き - Shelf{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="auth-title">貸出手続き</h1>
+
+  <div class="procedure-target">
+    <img src="{{ book.cover_image_url|default:'https://via.placeholder.com/120?text=No+Image' }}"
+         alt="{{ book.title }}"
+         class="book-cover"
+         onerror="this.src='https://via.placeholder.com/120?text=No+Image'">
+    
+    <div class="delete-target-info">
+      <p class="book-title">{{ book.title }}</p>
+      <p class="book-author">{{ book.author }}</p>
+    </div>
+  </div>
+
+  <form method="post" onsubmit="return confirm('この本を貸出しますか？');">
+    {% csrf_token %}
+
+    <div class="form-fields">
+      <p>
+        <label for="{{ form.borrowed_at.id_for_label }}">貸出日</label>
+        {{ form.borrowed_at }}
+        {% if form.borrowed_at.errors %}
+          <small class="error-text" style="color: var(--color-danger);">{{ form.borrowed_at.errors.0 }}</small>
+        {% endif %}
+      </p>
+    </div>
+
+    <button type="submit" class="btn btn-success btn-large">貸出を確定する</button>
+  </form>
+
+  <div class="auth-footer">
+    <a href="javascript:history.back()" class="link-secondary">戻る</a>
+  </div>
+</div>
+{% endblock %}

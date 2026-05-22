@@ -1,0 +1,852 @@
+/* ==========================================================================
+   TABLE OF CONTENTS (目次)
+   ==========================================================================
+   1. Variables ......... 共通変数
+   2. Base Styles ....... 基本設定
+   3. Layout ............ ページ全体の構造
+   4. UI Components ..... 汎用パーツ（ボタン、バッジ、テーブル等）
+   5. Features .......... 特定機能（認証、詳細、レビュー、登録等）
+   6. Utilities ......... ユーティリティ & レスポンシブ
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Variables (共通変数)
+   ========================================================================== */
+:root {
+  /* Brand Colors */
+  --color-primary: #4f46e5;
+  --color-primary-light: #eef2ff;
+  --color-success: #10b981;
+  --color-success-light: #ecfdf5;
+  --color-danger: #ef4444;
+  --color-danger-light: #fef2f2;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fffbeb;
+  --color-secondary: #64748b;
+  --color-secondary-light: #f1f5f9;
+
+  /* Text & Surface */
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-bg: #f8fafc;
+  --color-white: #fff;
+  --color-border: #e2e8f0;
+
+  /* Shared Values */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --radius: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+}
+
+/* ==========================================================================
+   2. Base Styles (基本設定)
+   ========================================================================== */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans JP",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  margin: 0;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    opacity 0.2s;
+}
+
+a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   3. Layout (レイアウト)
+   ========================================================================== */
+.container {
+  box-sizing: border-box;
+  flex: 1;
+  margin: 0 auto;
+  max-width: 1000px;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.main-header {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1000px;
+  padding: 0.8rem 2rem;
+}
+
+.nav-logo {
+  align-items: center;
+  background: linear-gradient(to bottom, #080539, var(--color-primary));
+  background-clip: text;
+  color: #080539;
+  display: flex;
+  font-family: "Inter", sans-serif;
+  font-size: 1.55rem; 
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  text-decoration: none;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-logo:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #080539;
+  outline-offset: 4px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item-auth {
+  align-items: center;
+  display: flex;
+}
+
+.main-footer {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* ==========================================================================
+   4. UI Components (汎用パーツ)
+   ========================================================================== */
+
+/* --- ボタン --- */
+.btn {
+  align-items: center;
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 600;
+  justify-content: center;
+  letter-spacing: 0.02em;
+  padding: 0.6rem 1.2rem;
+  text-align: center;
+  text-decoration: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover {
+  box-shadow: var(--shadow-md);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* クリック時 */
+.btn:active {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(0px);
+}
+
+/* 各カラーバリエーション */
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+}
+.btn-primary:hover {
+  background-color: #4338ca !important;
+}
+
+.btn-success {
+  background-color: var(--color-success) !important;
+  color: var(--color-white) !important;
+}
+.btn-success:hover {
+  background-color: #059669 !important;
+}
+
+.btn-warning {
+  background-color: var(--color-warning) !important;
+  color: var(--color-white) !important;
+}
+.btn-warning:hover {
+  background-color: #d97706 !important;
+}
+
+.btn-danger {
+  background-color: var(--color-danger) !important;
+  color: var(--color-white) !important;
+}
+.btn-danger:hover {
+  background-color: #dc2626 !important;
+}
+
+.btn-outline {
+  background-color: transparent !important;
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+  color: var(--color-text-muted) !important;
+}
+.btn-outline:hover {
+  background-color: var(--color-secondary-light) !important;
+  border-color: var(--color-secondary);
+  color: var(--color-text) !important;
+}
+
+/* サイズ・レイアウト用 */
+.btn-small {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+.btn-large {
+  display: block;
+  font-size: 1.2rem;
+  margin: 1rem auto 0;
+  max-width: 300px;
+  padding: 1.2rem;
+  width: 100%;
+}
+.btn-full {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+}
+
+.btn-fixed-width {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+  width: 120px;
+}
+
+/* テーブル内などのボタン幅を揃える */
+.col-status .btn {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ボタングループ */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* --- フォーム --- */
+.form-input,
+.form-select,
+.form-fields input,
+.form-fields select,
+.form-fields textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 1rem;
+  width: 100%;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  outline: none;
+}
+
+.form-fields label {
+  color: var(--color-text);
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+textarea.form-input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+select.form-input {
+  appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E")
+    no-repeat right 1rem center;
+  cursor: pointer;
+  padding-right: 2.5rem;
+}
+
+/* --- バッジ & ステータス --- */
+.status-tag,
+.badge {
+  align-items: center;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: 5px;
+  justify-content: center;
+  min-width: 100px;
+  padding: 0.25rem 0.75rem;
+}
+
+.status-tag-primary {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+.status-tag-success {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+.status-tag-danger {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+.status-tag-warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+.status-tag-secondary {
+  background-color: var(--color-secondary-light);
+  color: var(--color-secondary);
+}
+.status-tag-mine {
+  background-color: #e0e7ff;
+  border: 1px solid #c7d2fe;
+  color: #4338ca;
+  font-weight: 800;
+}
+
+.status-action-group {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  text-align: center;
+}
+
+/* --- テーブル --- */
+.table-container,
+.table-wrapper {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.data-table,
+.mypage-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td,
+.mypage-table th,
+.mypage-table td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem;
+  text-align: left;
+}
+
+.data-table thead th {
+  background-color: var(--color-secondary-light);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.data-table tbody tr:hover {
+  background-color: #fcfcfd;
+}
+
+/* 自分の借りている行の強調 */
+.row-my-item {
+  background-color: #f5f7ff !important;
+  border-left: 5px solid #4338ca;
+}
+
+/* ==========================================================================
+   5. Features (特定機能)
+   ========================================================================== */
+
+/* --- 書籍一覧のテキスト調整 --- */
+
+.book-title {
+  color: var(--color-text);
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  text-decoration: none;
+}
+
+.book-author {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 管理リンク(編集・削除) */
+.admin-action-links {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.admin-action-links a {
+  color: var(--color-secondary);
+  margin-right: 10px;
+  text-decoration: none;
+}
+
+.admin-action-links a:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* ページヘッダー（マイページなど） */
+.page-header {
+  align-items: baseline;
+  border-bottom: 2px solid var(--color-primary-light);
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+}
+
+.user-info {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* --- 認証 --- */
+.auth-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 2rem auto;
+  max-width: 400px;
+  padding: 2rem;
+}
+.auth-card.wide-card {
+  max-width: 600px;
+}
+.auth-title {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+/* --- 検索 --- */
+.search-form {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+}
+.search-group {
+  display: flex;
+  gap: 1rem;
+}
+.search-group .form-input {
+  flex: 2;
+  min-width: 200px;
+}
+.search-group .form-select {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* 書籍詳細のグリッドレイアウト */
+.book-detail-main {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+}
+
+.book-detail-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 300px 1fr;
+}
+
+.detail-cover img {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.book-title-large {
+  color: var(--color-text);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-cover-thumb {
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+  height: 100px;
+  object-fit: cover;
+  transition: transform 0.2s;
+  width: 70px;
+}
+.book-cover-thumb:hover {
+  transform: scale(1.05);
+}
+
+/* --- レビュー --- */
+.review-card {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  padding: 1.5rem;
+}
+.review-card-mine {
+  background-color: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+}
+.review-comment-scrollbox {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* 評価（星）の表示 */
+.review-rating {
+  color: #fbbf24;
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.review-rating-value {
+  color: var(--color-text);
+  font-weight: bold;
+}
+
+/* 書籍登録フォーム関連 */
+.isbn-field-group {
+  align-items: flex-end;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* --- QR/登録 --- */
+.qr-reader-container {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius);
+  margin: 1rem auto;
+  max-width: 500px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.btn-hidden {
+  display: none;
+}
+
+/* --- 削除・手続き対象の書籍情報表示 --- */
+.delete-target,
+.procedure-target {
+  align-items: center;
+  background-color: var(--color-secondary-light);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+.delete-target-info {
+  flex: 1;
+}
+
+.book-cover {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  height: 110px;
+  object-fit: cover;
+  width: 80px;
+}
+
+/* --- 完了画面のアイコン --- */
+.success-icon {
+  align-items: center;
+  border-radius: 50%;
+  display: flex;
+  font-size: 2rem;
+  font-weight: bold;
+  height: 60px;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  width: 60px;
+}
+
+.success-icon-success {
+  background-color: var(--color-success-light);
+  border: 2px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.success-icon-primary {
+  background-color: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* --- メッセージ・アラート --- */
+.auth-message {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.alert-danger {
+  background-color: var(--color-danger-light);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  color: var(--color-danger);
+  padding: 1rem;
+  text-align: center;
+}
+
+.alert-danger p {
+  font-weight: bold;
+  margin: 0;
+}
+
+/* --- 貸出・返却ガイド (日付や場所) --- */
+.date-badge {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.date-badge-label {
+  background: var(--color-secondary);
+  color: var(--color-white);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+}
+
+.date-badge-value {
+  font-family: monospace;
+  font-weight: bold;
+  padding: 0.3rem 0.8rem;
+}
+
+.location-guide {
+  background-color: var(--color-warning-light);
+  border-left: 4px solid var(--color-warning);
+  margin-top: 1.5rem;
+  padding: 1rem;
+}
+
+.location-guide-label {
+  color: var(--color-warning);
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.location-guide p {
+  margin: 0;
+}
+
+/* --- 補助的なリンク --- */
+.link-secondary {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.link-secondary:hover {
+  color: var(--color-text);
+}
+
+.auth-footer {
+  border-top: 1px solid var(--color-border);
+  margin-top: 2rem;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+/* ==========================================================================
+   6. Utilities (ユーティリティ & レスポンシブ)
+   ========================================================================== */
+
+/* レイアウト・コンテナ */
+.detail-container,
+.form-container {
+  margin: 2rem auto;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+/* テキスト配置 */
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.mt-1 {
+  margin-top: 1rem;
+}
+.mb-1 {
+  margin-bottom: 1rem;
+}
+
+/* テーブル列幅固定 (PC用) */
+.col-cover,
+.td-cover {
+  width: 80px;
+}
+.col-status {
+  text-align: center;
+  width: 130px;
+}
+.col-status .btn {
+  display: block;
+  width: 100%;
+}
+
+/* フォームのセクション区切り */
+.form-section {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+.section-title {
+  border-left: 4px solid var(--color-primary);
+  font-size: 1.1rem;
+  margin-bottom: 1.2rem;
+  padding-left: 0.75rem;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0.5rem 1rem;
+  }
+  .nav-links {
+    font-size: 0.9rem;
+    gap: 0.8rem;
+  }
+
+  /* テーブルのカード化 */
+  .book-list-table,
+  .mypage-table,
+  .book-list-table thead,
+  .mypage-table thead {
+    display: none;
+  }
+
+  .book-list-table tr,
+  .mypage-table tr {
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+    display: grid;
+    gap: 0.5rem 1rem;
+    grid-template-areas:
+      "cover title"
+      "cover info"
+      "action action";
+    grid-template-columns: 80px 1fr;
+    padding: 1rem;
+  }
+
+  .td-cover {
+    grid-area: cover;
+  }
+  .td-title {
+    font-weight: bold;
+    grid-area: title;
+  }
+  .td-info {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    grid-area: info;
+  }
+  .td-actions {
+    grid-area: action;
+    margin-top: 0.5rem;
+    width: 100% !important;
+  }
+  .td-actions .btn .btn-fixed-width {
+    width: 100%;
+  }
+  .book-detail-grid,
+  .form-grid,
+  .search-group {
+    grid-template-columns: 1fr;
+  }
+  .detail-cover img {
+    display: block;
+    margin: 0 auto;
+    max-width: 200px;
+  }
+  .isbn-field-group {
+    flex-direction: column;
+  }
+}
