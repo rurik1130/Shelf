@@ -6,7 +6,9 @@
 
 {% block content %}
 <div class="form-container">
-  <h1 class="auth-title text-left">書籍登録</h1>
+  <h1 class="auth-title text-left">
+    {% if form.instance.pk %}書籍編集{% else %}書籍登録{% endif %}
+  </h1>
 
   <form method="post" class="book-form">
     {% csrf_token %}
@@ -50,7 +52,7 @@
             <p class="preview-label"><strong>書影プレビュー</strong></p>
             <div class="preview-box">
               <img id="cover-preview"
-                  src=""
+                  src="https://via.placeholder.com/150?text=No+Image"
                   class="img-preview"
                   alt="書影プレビュー"
                   style="display: none;" 

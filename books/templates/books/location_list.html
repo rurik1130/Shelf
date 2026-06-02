@@ -60,28 +60,28 @@
   </table>
 </div>
 
-<div id="locationModal" class="modal-overlay" style="display:none;">
-  <div class="modal-content">
+<form id="locationModal" action="{% url 'books:location_create' %}" method="post" class="modal-overlay" style="display:none;">
+  {% csrf_token %} <div class="modal-content">
     <h1 class="auth-title text-left" style="margin-top: 0; font-size: 1.5rem;">新しい保管場所を追加</h1>
     <div class="form-fields">
       <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 1rem;">
         <p style="flex: 1; margin: 0;">
           <label for="newLocationFloor">フロア <span class="required" aria-hidden="true">*</span></label>
-          <input type="text" id="newLocationFloor" placeholder="5, B1" class="form-input">
+          <input type="text" id="newLocationFloor" name="floor" placeholder="5, B1" class="form-input" required>
         </p>
         <span style="font-size: 1.2rem; font-weight: bold; padding-bottom: 8px; color: #555;">F</span>
         <p style="flex: 2; margin: 0;">
           <label for="newLocationName">エリア <span class="required" aria-hidden="true">*</span></label>
-          <input type="text" id="newLocationName" placeholder="ミーティングルーム" class="form-input">
+          <input type="text" id="newLocationName" name="name" placeholder="ミーティングルーム" class="form-input" required>
         </p>
       </div>
     </div>
     <div class="form-actions mt-1" style="display: flex; gap: 8px; justify-content: flex-end;">
-      <button type="button" onclick="saveLocation()" class="btn btn-success">保存</button>
+      <button type="submit" class="btn btn-success">保存</button>
       <button type="button" onclick="hideLocationModal()" class="btn btn-outline">キャンセル</button>
     </div>
   </div>
-</div>
+</form>
 {% endblock %}
 
 {% block extra_js %}
@@ -100,61 +100,6 @@ function hideLocationModal() {
   document.getElementById("locationModal").style.display = "none";
   document.getElementById("newLocationFloor").value = "";
   document.getElementById("newLocationName").value = "";
-}
-
-/**
- * 非同期（Ajax）で新しい保管場所をサーバーに保存し、画面をリロードせずにセレクトボックスへ追加する
- */
-async function saveLocation() {
-  const floorInput = document.getElementById("newLocationFloor");
-  const nameInput = document.getElementById("newLocationName");
-  const floor = floorInput.value.trim();
-  const name = nameInput.value.trim();
-  
-  // バリデーション：未入力チェック
-  if (!floor || !name) {
-    alert("フロアとエリアの両方を入力してください");
-    return;
-  }
-
-  try {
-    // Djangoのビューに対して非同期POSTリクエストを送信
-    const response = await fetch("{% url 'books:location_create' %}", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRFToken": "{{ csrf_token }}", // DjangoのCSRF対策
-        "X-Requested-With": "XMLHttpRequest" // サーバー側にAjaxリクエストであることを伝える
-      },
-      body: `floor=${encodeURIComponent(floor)}&name=${encodeURIComponent(name)}`
-    });
-
-    if (!response.ok) throw new Error("保存に失敗しました");
-
-    // サーバーから返ってきたJSONデータ（新しく作成されたデータのIDや名前）を取得
-    const data = await response.json();
-
-    // 既存のセレクトボックス
-    const select = document.getElementById("id_location"); 
-    
-    if (select) {
-      // 1. 新しい選択肢（Option）を作成: new Option("画面に表示する文字", "valueに設定する値")
-      // ※サーバーの返却データ構造が { id: 1, name: "2F 専門書エリア" } などの想定
-      const option = new Option(data.name, data.id);
-      
-      // 2. セレクトボックスの末尾に選択肢を追加
-      select.add(option);
-      
-      // 3. 今追加した新しい保管場所を自動的に選択状態にする
-      select.value = data.id;
-    }
-
-    // モーダルを閉じて入力欄をクリア
-    hideLocationModal();
-
-  } catch (err) {
-    alert(err.message);
-  }
 }
 </script>
 {% endblock %}

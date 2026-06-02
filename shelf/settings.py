@@ -19,9 +19,7 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # environの初期化
-env = environ.Env(
-    DEBUG=(bool, False)  # デフォルトは安全のためFalseにしておく
-)
+env = environ.Env(DEBUG=(bool, False))
 # .envファイルの読み込み
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
@@ -46,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_extensions",
     "accounts",
     "books",
 ]
