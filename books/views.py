@@ -249,7 +249,7 @@ def location_delete(request, id):
     if request.method == "POST":
         location_name = location.name
 
-        success, error = delete_location(location)
+        _success, error = delete_location(location)
         if error:
             messages.error(request, error)
             return redirect("books:location_list")
