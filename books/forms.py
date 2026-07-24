@@ -1,6 +1,7 @@
 from django import forms
-from django.db.models import IntegerField, Case, When
+from django.db.models import Case, IntegerField, When
 from django.db.models.functions import Cast, Substr
+
 from .models import Book, Borrow, Location, Review
 
 
