@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django import forms
 from django.db.models import Case, IntegerField, When
 from django.db.models.functions import Cast, Substr
@@ -70,7 +72,7 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ("rating", "comment")
-        widgets = {
+        widgets: ClassVar = {
             "comment": forms.Textarea(
                 attrs={
                     "placeholder": "2文字以上で入力してください",

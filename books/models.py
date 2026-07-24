@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import ClassVar
 
 from django.conf import settings
 from django.db import models
@@ -18,20 +19,11 @@ class Book(models.Model):
     """本（蔵書）の情報を管理するモデル 貸出状況や予約状況に基づいた動的なステータス判定機能を持つ"""
 
     # フロントエンド（HTML/CSS）のバッジ表示にそのまま連動できるよう、判定用のステータスキーに対して、文言と色（CSSクラス名）をマッピング
-    STATUS_LABELS = {
+    STATUS_LABELS: ClassVar = {
         "available": {"label": "貸出可", "color": "success"},
-        "reserved": {
-            "label": "予約可",
-            "color": "warning",
-        },
-        "borrowed": {
-            "label": "貸出中",
-            "color": "danger",
-        },
-        "waiting": {
-            "label": "予約者待ち",
-            "color": "secondary",
-        },
+        "reserved": {"label": "予約可", "color": "warning"},
+        "borrowed": {"label": "貸出中", "color": "danger"},
+        "waiting": {"label": "予約者待ち", "color": "secondary"},
     }
 
     isbn = models.CharField(max_length=20, blank=True, null=True)
@@ -158,12 +150,12 @@ class Reservation(models.Model):
 
     class Meta:
         # 1冊の本に対して、同時に存在できる予約は1つまで
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=["book"],
                 name="unique_reservation_per_book",
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return f"{self.user} - {self.book}"
@@ -172,13 +164,13 @@ class Reservation(models.Model):
 class Review(models.Model):
     """本に対するユーザーの評価とコメント"""
 
-    RATING_CHOICES = [
+    RATING_CHOICES = (
         (1, "★1"),
         (2, "★2"),
         (3, "★3"),
         (4, "★4"),
         (5, "★5"),
-    ]
+    )
 
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     user = models.ForeignKey(
@@ -190,12 +182,12 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=["book", "user"],
                 name="unique_review_per_user_book",
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return f"{self.book.title} - {self.user}"
